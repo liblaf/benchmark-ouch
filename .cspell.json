@@ -1,0 +1,32 @@
+{
+  "words": [
+    "bechmark",
+    "cksum",
+    "cython",
+    "dmypy",
+    "eifinger",
+    "ipynb",
+    "ipython",
+    "liblaf",
+    "mkdocs",
+    "mypy",
+    "pipenv",
+    "pybuilder",
+    "pycache",
+    "pydantic",
+    "pyenv",
+    "pyflow",
+    "pymdownx",
+    "pypa",
+    "pypackages",
+    "pyrightconfig",
+    "pytest",
+    "pytype",
+    "scrapy",
+    "sdist",
+    "typer",
+    "venv"
+  ],
+  "ignorePaths": ["**/*-lock.*", "**/*.lock*", "**/.cspell.json"],
+  "allowCompoundWords": true
+}
