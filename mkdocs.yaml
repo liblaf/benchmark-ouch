@@ -1,9 +1,13 @@
 # yaml-language-server: $schema=https://squidfunk.github.io/mkdocs-material/schema.json
 
-site_name: Benchmarks
+site_name: Benchmark
 site_url: https://liblaf.github.io/benchmark-ouch/
+repo_name: liblaf/benchmark-ouch
 repo_url: https://github.com/liblaf/benchmark-ouch
 site_author: liblaf
+edit_uri: edit/main/docs/
+extra_css:
+  - css/custom.css
 
 theme:
   name: material
@@ -54,11 +58,10 @@ theme:
 
 plugins:
   # Built-in plugins
-  # - optimize
+  # - optimize # Sponsors only
   - search
   - social
   # External plugins, schema provided by us
-  - git-authors
   - git-committers:
       enabled: !ENV [CI, false]
       repository: liblaf/benchmark-ouch
@@ -68,4 +71,6 @@ plugins:
   # External plugins, schema provided by our community
   - git-revision-date-localized:
       enable_creation_date: true
-  - external-markdown
+
+watch:
+  - docs/

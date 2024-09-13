@@ -2,8 +2,6 @@ name: Bechmark
 
 on:
   push:
-  schedule:
-    - cron: 0 0 * * *
 
 jobs:
   bench:
@@ -12,35 +10,32 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
-      - name: Setup Rye
-        uses: eifinger/setup-rye@v4
-      - if: matrix.benchmark == 'ouch'
-        name: Install ouch
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          cache: pip
+          cache-dependency-path: |-
+            requirements-dev.lock
+            requirements.lock
+      - name: Install ouch
         run: |-
           wget https://github.com/ouch-org/ouch/releases/latest/download/ouch-x86_64-unknown-linux-gnu.tar.gz
           tar --extract --file ouch-x86_64-unknown-linux-gnu.tar.gz
           install -D --no-target-directory --verbose ouch-x86_64-unknown-linux-gnu/ouch ~/.local/bin/ouch
           echo ~/.local/bin >> "$GITHUB_PATH"
-      - name: Install Dependencies
-        run: rye sync --no-lock
-      - if: matrix.benchmark == 'ouch'
-        name: Prepare Benchmark
+      - name: Prepare Benchmark
         run: bash scripts/prepare.sh
       - name: Run Benchmark
         run: |-
-          source .venv/bin/activate
+          python src/bench/cksum.py
+          python src/bench/ouch.py
           mkdir --parents --verbose results/
-          python src/bench/${{ matrix.benchmark }}.py --output results/${{ matrix.benchmark }}.md
+          cp docs/{cksum,ouch}.md results/
       - name: Upload Results
         uses: actions/upload-artifact@v4
         with:
-          name: ${{ matrix.benchmark }}
+          name: results
           path: results/
-    strategy:
-      matrix:
-        benchmark:
-          - cksum
-          - ouch
 
   upload:
     name: Upload
@@ -53,8 +48,8 @@ jobs:
       - name: Download Results
         uses: actions/download-artifact@v4
         with:
+          name: results
           path: results/
-          merge-multiple: true
       - name: Upload to GitHub Branch
         uses: peaceiris/actions-gh-pages@v4
         with:
@@ -62,3 +57,31 @@ jobs:
           publish_branch: bench
           publish_dir: results/
           force_orphan: true
+
+  docs:
+    name: Docs
+    permissions:
+      contents: write
+    runs-on: ubuntu-latest
+    needs:
+      - bench
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          cache: pip
+          cache-dependency-path: |-
+            requirements-dev.lock
+            requirements.lock
+      - name: Download Results
+        uses: actions/download-artifact@v4
+        with:
+          name: results
+          path: docs/
+      - name: Build Docs
+        run: mkdocs build
+      - if: github.ref == 'refs/heads/main'
+        name: Deploy to GitHub Pages
+        run: mkdocs gh-deploy --force --no-history
